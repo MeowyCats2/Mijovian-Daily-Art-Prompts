@@ -1,4 +1,5 @@
 import client from "./client.ts";
+import "./webserver.ts";
 import { dataContent, saveData } from "./dataMsg.ts"
 import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events } from "discord.js";
 import type { TextChannel, RESTPutAPIApplicationCommandsJSONBody, GuildMember } from "discord.js"
