@@ -23,15 +23,15 @@ const newDay = async () => {
     }
     await targetChannel.send({
         content: `# M.D.A.P
-    ## Mijovian Daily Art Prompts
-    <@&1327097901507154051>
-    ## Members
-    ${membersString.join("\n")}
+## Mijovian Daily Art Prompts
+<@&1327097901507154051>
+## Members
+${membersString.join("\n")}
 
-    ## Submitting
-    To submit your art, run the /submit_art command.
+## Submitting
+To submit your art, run the /submit_art command.
 
-    ## Voting`,
+## Voting`,
         allowedMentions: {
             users: []
         }
