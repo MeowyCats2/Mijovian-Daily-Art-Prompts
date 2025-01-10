@@ -24,6 +24,7 @@ const newDay = async () => {
     await targetChannel.send({
         content: `# M.D.A.P
     ## Mijovian Daily Art Prompts
+    <@&1327097901507154051>
     ## Members
     ${membersString.join("\n")}
 
