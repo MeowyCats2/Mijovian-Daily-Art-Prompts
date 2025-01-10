@@ -94,6 +94,8 @@ client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
     if (interaction.commandName !== "submit_art") return;
     await interaction.deferReply();
+    const index = dataContent.current.submissions.findIndex(submission => submission.user === interaction.user.id && submission.target === dataContent.current.members[interaction.options.getInteger("member", true) - 1].id)
+    if (index > -1) dataContent.current.submissions.splice(index, 1);
     const buffer = await (await fetch(interaction.options.getAttachment("artwork")!.url)).arrayBuffer();
     const message = await dataChannel.send({
         files: [
@@ -110,7 +112,7 @@ client.on(Events.InteractionCreate, async interaction => {
         target: dataContent.current.members[interaction.options.getInteger("member", true) - 1].id
     })
     await saveData();
-    await interaction.followUp("Test")
+    await interaction.followUp(index === -1 ? "Replaced." : "Submitted.")
 });
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
