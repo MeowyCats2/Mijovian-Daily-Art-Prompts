@@ -114,7 +114,7 @@ client.on(Events.InteractionCreate, async interaction => {
         target: dataContent.current.members[interaction.options.getInteger("member", true) - 1].id
     })
     await saveData();
-    await interaction.followUp(index === -1 ? "Replaced." : "Submitted.")
+    await interaction.followUp((index === -1 ? "Replaced." : "Submitted.") + " - " + buffer.byteLength + " bytes")
 });
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
