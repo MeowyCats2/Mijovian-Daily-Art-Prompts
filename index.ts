@@ -33,7 +33,8 @@ To submit your art, run the /submit_art command.
 
 ## Voting`,
         allowedMentions: {
-            users: []
+            users: [],
+            roles: ["1327097901507154051"]
         }
     })
     for (const submission of dataContent.current.submissions) {
