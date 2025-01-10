@@ -25,13 +25,13 @@ const newDay = async () => {
         content: `# M.D.A.P
 ## Mijovian Daily Art Prompts
 <@&1327097901507154051>
-## Members
+## Members to Draw
 ${membersString.join("\n")}
 
-## Submitting
+## How to Submit
 To submit your art, run the /submit_art command.
 
-## Voting`,
+## Yesterday's Submissions`,
         allowedMentions: {
             users: [],
             roles: ["1327097901507154051"]
