@@ -7,13 +7,15 @@ export const dataContent = JSON.parse(attachmentText) as {
     submissions: {
         message: Snowflake,
         user: Snowflake,
-        target: Snowflake
+        target: Snowflake,
+        timestamp: number
     }[],
     current: {
         submissions: {
             message: Snowflake,
             user: Snowflake,
-            target: Snowflake
+            target: Snowflake,
+            timestamp: number
         }[],
         members: {
             id: Snowflake,

@@ -42,7 +42,7 @@ To submit your art, run the /submit_art command.
         const message = await dataChannel.messages.fetch(submission.message);
         await targetChannel.send({
             content: `Submitted by: <@${submission.user}>
-    Drawing: <@${submission.target}>`,
+Drawing of: <@${submission.target}>`,
             files: [
                 {
                     attachment: [...message.attachments.values()][0].url,
@@ -111,7 +111,8 @@ client.on(Events.InteractionCreate, async interaction => {
     dataContent.current.submissions.push({
         message: message.id,
         user: interaction.user.id,
-        target: dataContent.current.members[interaction.options.getInteger("member", true) - 1].id
+        target: dataContent.current.members[interaction.options.getInteger("member", true) - 1].id,
+        timestamp: Date.now()
     })
     await saveData();
     await interaction.followUp((index === -1 ? "Replaced." : "Submitted.") + " - " + buffer.byteLength + " bytes")
@@ -125,7 +126,8 @@ client.on(Events.InteractionCreate, async interaction => {
         const message = await dataChannel.messages.fetch(submission.message);
         await interaction.followUp({
             content: `Submitted by: <@${submission.user}>
-Drawing: <@${submission.target}>`,
+Drawing: <@${submission.target}>
+Timestamp: <t:${Math.floor(submission.timestamp / 1000)}>`,
             files: [
                 {
                     attachment: [...message.attachments.values()][0].url,
@@ -169,7 +171,8 @@ client.on(Events.InteractionCreate, async interaction => {
         const message = await dataChannel.messages.fetch(submission.message);
         await interaction.followUp({
             content: `Submitted by: <@${submission.user}>
-Drawing: <@${submission.target}>`,
+Drawing: <@${submission.target}>
+Timestamp: <t:${Math.floor(submission.timestamp / 1000)}>`,
             files: [
                 {
                     attachment: [...message.attachments.values()][0].url,
