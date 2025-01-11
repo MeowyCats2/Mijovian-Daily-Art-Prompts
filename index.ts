@@ -99,7 +99,6 @@ client.on(Events.InteractionCreate, async interaction => {
     const index = dataContent.current.submissions.findIndex(submission => submission.user === interaction.user.id && submission.target === dataContent.current.members[interaction.options.getInteger("member", true) - 1].id)
     if (index > -1) dataContent.current.submissions.splice(index, 1);
     const buffer = await (await fetch(interaction.options.getAttachment("artwork")!.url)).arrayBuffer();
-    console.log("byte length is " + buffer.byteLength)
     const message = await dataChannel.send({
         files: [
             {
@@ -116,7 +115,7 @@ client.on(Events.InteractionCreate, async interaction => {
         timestamp: Date.now()
     })
     await saveData();
-    await interaction.followUp((index === -1 ? "Replaced." : "Submitted.") + " - " + buffer.byteLength + " bytes")
+    await interaction.followUp((index === -1 ? "Replaced." : "Submitted.") + " (" + buffer.byteLength + " bytes)")
 });
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
