@@ -24,6 +24,41 @@ export const dataContent = JSON.parse(attachmentText) as {
         }[]
     },
     lastRun: string,
+    activity: Record<Snowflake, {
+        general: {
+            status: Record<string, number>,
+            chat: Record<string, number>,
+            last: {
+                status: string,
+                chat: string
+            }
+        },
+        workdays: {
+            status: Record<string, number>,
+            chat: Record<string, number>,
+            last: {
+                status: string,
+                chat: string
+            }
+        },
+        weekend: {
+            status: Record<string, number>,
+            chat: Record<string, number>,
+            last: {
+                status: string,
+                chat: string
+            }
+        },
+        weekdays: Record<string, {
+            status: Record<string, number>,
+            chat: Record<string, number>,
+            last: {
+                status: string,
+                chat: string
+            }
+        }>,
+    }>,
+    lastStatusUpdate: string
 };
 export const saveData = async () => await dataMsg.edit({
     "files": [

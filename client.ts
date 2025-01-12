@@ -5,7 +5,8 @@ import { Client, GatewayIntentBits, Events } from 'discord.js';
 const client = new Client({
     intents: [GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration,
 GatewayIntentBits.Guilds,
-GatewayIntentBits.GuildMessages],
+GatewayIntentBits.GuildMessages,
+GatewayIntentBits.GuildPresences],
   }); // creates a new bot client
 
 client.once(Events.ClientReady, c => {

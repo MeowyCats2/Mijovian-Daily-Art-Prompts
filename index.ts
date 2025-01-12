@@ -3,6 +3,7 @@ import "./webserver.ts";
 import { dataContent, saveData } from "./dataMsg.ts"
 import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events } from "discord.js";
 import type { TextChannel, RESTPutAPIApplicationCommandsJSONBody, GuildMember } from "discord.js"
+import "./activity.ts";
 import JSZip from "jszip";
 
 const targetChannel = await client.channels.fetch("1327068800931070064") as TextChannel;
@@ -232,6 +233,19 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
         type: ApplicationCommandType.ChatInput,
         name: "export_art",
         description: "Export all your submissions"
+    },
+    {
+        type: ApplicationCommandType.ChatInput,
+        name: "activity_chart",
+        description: "See the activity of a member",
+        options: [
+            {
+                type: ApplicationCommandOptionType.User,
+                name: "member",
+                description: "The member to check for",
+                required: true
+            }
+        ]
     },
 ]
 if (!client.application) throw new Error("No application for client?")
