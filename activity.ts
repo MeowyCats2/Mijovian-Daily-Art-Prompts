@@ -100,7 +100,8 @@ setTimeout(() => {
 
 client.on(Events.PresenceUpdate, async presence => {
     if (!presence) return;
-    updateActivity(presence.userId, "chat");
+    if (presence.status === "offline") return;
+    updateActivity(presence.userId, "status");
     await saveData();
 });
 
