@@ -98,6 +98,12 @@ setTimeout(() => {
     setInterval(newHour, 60 * 60 * 1000)
 }, getMillisecondsUntilNextHour())
 
+client.on(Events.PresenceUpdate, async presence => {
+    if (!presence) return;
+    updateActivity(presence.userId, "chat");
+    await saveData();
+});
+
 client.on(Events.MessageCreate, async message => {
     if (!message) return;
     if (message.webhookId) return;
@@ -110,10 +116,14 @@ client.on(Events.InteractionCreate, async interaction => {
     if (interaction.commandName !== "activity_chart") return;
     const data = dataContent.activity[(interaction.options.getMember("member") as GuildMember).id]?.general.status;
     if (!data) return await interaction.reply("No data.")
+    const hours: Record<string, number> = {};
+    for (let i = 0; i < 24; i++) {
+        hours[i] = data[i] ?? 0;
+    }
     const chart = new ChartJsImage();
     chart.setConfig({
       type: "bar",
-      data: { labels: Object.keys(data), datasets: [{ label: "Hours", data: Object.values(data) }] },
+      data: { labels: Object.keys(hours), datasets: [{ label: "Hours", data: Object.values(hours) }] },
     });
     await interaction.reply({
         "files": [
