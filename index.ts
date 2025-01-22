@@ -1,7 +1,7 @@
 import client from "./client.ts";
 import "./webserver.ts";
 import { dataContent, saveData } from "./dataMsg.ts"
-import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events } from "discord.js";
+import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, InteractionContextType } from "discord.js";
 import type { TextChannel, RESTPutAPIApplicationCommandsJSONBody, GuildMember } from "discord.js"
 import "./activity.ts";
 import JSZip from "jszip";
@@ -258,12 +258,18 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
                 description: "The artwork you're submitting",
                 required: true
             }
+        ],
+        contexts: [
+            InteractionContextType.Guild
         ]
     },
     {
         type: ApplicationCommandType.ChatInput,
         name: "my_art",
-        description: "See all your submissions"
+        description: "See all your submissions",
+        contexts: [
+            InteractionContextType.Guild
+        ]
     },
     {
         type: ApplicationCommandType.ChatInput,
@@ -276,12 +282,18 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
                 description: "The member to check for",
                 required: true
             }
+        ],
+        contexts: [
+            InteractionContextType.Guild
         ]
     },
     {
         type: ApplicationCommandType.ChatInput,
         name: "export_art",
-        description: "Export all your submissions"
+        description: "Export all your submissions",
+        contexts: [
+            InteractionContextType.Guild
+        ]
     },
     {
         type: ApplicationCommandType.ChatInput,
@@ -294,12 +306,20 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
                 description: "The member to check for",
                 required: true
             }
+        ],
+        contexts: [
+            InteractionContextType.Guild
         ]
     },
     {
         type: ApplicationCommandType.ChatInput,
         name: "get_duolingo",
-        description: "Get a Duolingo invite"
+        description: "Get a Duolingo invite",
+        contexts: [
+            InteractionContextType.Guild,
+            InteractionContextType.BotDM,
+            InteractionContextType.PrivateChannel
+        ]
     },
 ]
 if (!client.application) throw new Error("No application for client?")
