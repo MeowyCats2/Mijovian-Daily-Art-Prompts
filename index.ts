@@ -102,7 +102,7 @@ Drawing of: <@${submission.target}>`,
     }))
     await saveData();
 
-    ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("https://invite.duolingo.com/family-plan/" + await generateDuolingoInvite());
+    ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("https://www.duolingo.com/family-plan?invite=" + await generateDuolingoInvite());
 }
 
 if (dataContent.lastRun !== getCurrentDate()) newDay();
@@ -235,7 +235,7 @@ client.on(Events.InteractionCreate, async interaction => {
     } catch (e) {
         return await interaction.followUp("Failed to generate an invite.")
     }
-    return await interaction.followUp("https://invite.duolingo.com/family-plan/" + inviteCode)
+    return await interaction.followUp("https://www.duolingo.com/family-plan?invite=" + inviteCode)
 })
 const commands: RESTPutAPIApplicationCommandsJSONBody = [
     {
