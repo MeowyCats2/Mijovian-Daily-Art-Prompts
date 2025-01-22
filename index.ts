@@ -10,6 +10,41 @@ const targetChannel = await client.channels.fetch("1327068800931070064") as Text
 const dataChannel = await client.channels.fetch("1327066650133925898") as TextChannel;
 const getCurrentDate = () => (new Date()).getUTCFullYear() + "-" + (new Date()).getUTCMonth() + "-" + (new Date()).getUTCDate();
 
+const generateDuolingoInvite = async () => {
+    const userCreationResponse = await fetch("https://www.duolingo.com/2017-06-30/users?fields=id", {
+        "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:134.0) Gecko/20100101 Firefox/134.0",
+            "Accept": "application/json; charset=UTF-8",
+            "Accept-Language": "en-CA,en-US;q=0.7,en;q=0.3",
+            "X-Amzn-Trace-Id": "User=0",
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json; charset=UTF-8"
+        },
+        "referrer": "https://www.duolingo.com/register",
+        "body": "{\"distinctId\":\"0f678ecb-6de9-4c08-96da-26eed68f8e22\",\"signal\":{\"siteKey\":\"6LcLOdsjAAAAAFfwGusLLnnn492SOGhsCh-uEAvI\",\"token\":\"03AFcWeA6ngV7TPcJ0KPAeWzzxiR2tSmcNCCAg9iSy0bzOfyIhpZCVEanqYYp1LS5jXDhODeJUY-G1TRBUiHG9dFZNe3C94ETKHKfIRHZxCadqRtbW4C8_KseSMMFrRr0iQ0QrwsmqOpvwkx5ChUZgLcFW66u_DI9tTyCoZu6JeSIpyMejbvC250uoq_4tflvynpsFbar1DW6swOAlARSzuED_rt6brSSPDboVJD6yO_P4TprjQCdw28GxyvIDteqjRVlpHgvBBiAHJz_XEn9rCQRnWqu_kgTdDHoLKdqOUtJZ7sd8jKCiZgpEYgafRwHqTF7_NtX35MjMrEWjQd76ZNQIfUUP2wmzGxDPD3ORSLokYJ-mLGo1nfNWG3390otQaMwsV5IzGNhf2vbR4A8bmiqkMoO6vQussNRoCw-dkhF0Md3KBRdC7PdWhtcDAL0AhtYuciERa5PZT1nFTCsmzt6e4tW7sfM-gZ27zcZOvIfjRJGLQL51FFjYW4GIDtZiSnWhbkLP5BNU_6BpDSBqDVLxceY1vqJsKt9deuScZ5YAMxIdffhPd2y4BU4gYOKbGjNSzL0LPuylVOWJL5QGc99-5bWKKEQaeHsQ5c9NssIZs9RbEG6CuVwMgREt_M1jPFi_1CVfChZVirfX5Ee2Z0a9l5bGyZUtg4Md4WfJ8JAtfCaIZvNrNbpFaTBzCu5ZPLvPnMYIfljvbJnF7hJYwAr1CM31ZmEe5UCCdCsjLe-tTYtCp6s5SZGgZ53xkht6Y-hO76EK80MJYkGKHyk16KQxeIlsfDhriE75VhAQUX9h8SqpCxUIRXvU1KtNx8zPln6uNKjfxKlwoF0kWYYykWHuUDC1hQYelOMQOhaq2Gck7sAOxO9NWjs7tCaOxLu9EaeCpEhkLUXvhQ8Nn9-xhRhK9MYgUYrnoKCisqgPvfzaZbTRA94AZ9fZ2KDUaVcMKqmg1ebf7vOyiFOTMUhWHHJ38r9EvODuNVnRTzYLwtCYUyvIQYe32CnVH-SO9Cmda4ULKvtO_GcfChPJnNx7O2ftfCy4WS2IZymbRpTBwJ5TO6cS__DO9myNkxScqk7jgRL0Ck-AAh5VEn3ZPiYpGQ92Ee5Recubq5Hx2dffMqrlfl00xFdCw8kMDtVN3V_BjqVQ_aXutkb6rLkdiOKnjiCwPxvMRqkUkUj_k8GqSJhd9AUaOj4LX3Qzpk7hEmOhH54skv5Uoy8oqvqKwun3Z4_Y1LNZTa8keTIHpkq2EjDW4xyOiwOByz_OSa1Cgx_ytk764cdnl22-5R21K_ppnUFGe9QY6B2K7iRrAO2UMpchiKaXKdIfCY0Ev5BhVQ4uSJQIFtlmDEmUFmvPyM7lS6juElfHj_T36FuyiQts-XCEdwk_rGob2jdB3AJffYSXg6Y-EWumXEWdDy0HdWTBOvfrHLjXzIZwP3WGc8NQauy0MrdM8Okmg6dlUmXhKlffhi2qzUawx7ie-1VfQ1YKXR58FKNqbT76ua0iWUnCozl1mc7cB-PxFDhBHRHYWnT8YLfiQvkoL__MlIrX4m9s8QF9VH8fcAEOH5zyfbxTHBg4iXIK7XKtaSr6gdpyY3HYvPyfNBdO-B0xXfo5eRCbcBPBLxQTnqZ50a0AwVI3SyTl1_G-ShAOjcrbCYlW1wza_DYgsJGmLm-Z-1X6RlXTDB1tJlX74INo6ZJIBiWKlmplkpiehhz7GSBaBIrQbiwH4-bBelvFCspEnQceBGJCYd4bI_V29arQbspMWwD9zjMTewbpfgIu5Xpm-vlLvYCWHiCaN4CcX0P4sBA-MxT2fsyDVXfhxjknweUre7qsFQhmKFbwSf8FTHE-Z1QWCOIwAEJcv0148OLwiTJD8oom7Whm7bwxlNH4oKp3pTA_jWIlrx_HbR3a7Z9XJx42YC7HYaggI11q0N0HYhHyFMILnORQ51ND2FfSG4lii9DlfPEgBgOzLoFvlYcjTNigQ1pCnX_vLRJFTRLc\",\"vendor\":2},\"timezone\":\"America/Vancouver\",\"fromLanguage\":\"en\",\"learningLanguage\":\"es\",\"landingUrl\":\"https://www.duolingo.com/redeem\",\"initialReferrer\":\"https://www.reddit.com/\",\"lastReferrer\":\"https://www.reddit.com/\"}",
+        "method": "POST"
+    })
+    
+    const setCookie = userCreationResponse.headers.getSetCookie();
+    
+    const userId = (await userCreationResponse.json()).id;
+    
+    const redeemFamilyPlanResponse = await fetch(`https://www.duolingo.com/2017-06-30/users/${userId}/shop-items`, {
+        "headers": {
+            "Accept": "application/json; charset=UTF-8",
+            "Authorization": "Bearer " + setCookie.find(cookie => cookie.startsWith("jwt_token="))!.match(/jwt_token=(.+?);/)![1],
+            "Content-Type": "application/json; charset=UTF-8"
+        },
+        "referrer": "https://www.duolingo.com/lesson",
+        "body": "{\"itemName\":\"immersive_plus_family_gems_1000\",\"learningLanguage\":\"fr\",\"isFree\":true}",
+        "method": "POST",
+        "mode": "cors"
+    });
+    
+    const purchaseInfo = await redeemFamilyPlanResponse.json();
+    
+    return purchaseInfo.familyPlanInfo.inviteToken;
+}
 const newDay = async () => {
     const membersCollection = await targetChannel.guild.members.fetch();
     const members: GuildMember[] = [];
@@ -65,7 +100,9 @@ Drawing of: <@${submission.target}>`,
         displayName: member.displayName,
         username: member.user.username
     }))
-    await saveData()
+    await saveData();
+
+    ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("https://invite.duolingo.com/family-plan/" + await generateDuolingoInvite());
 }
 
 if (dataContent.lastRun !== getCurrentDate()) newDay();
@@ -188,6 +225,18 @@ Timestamp: <t:${Math.floor(submission.timestamp / 1000)}>`,
     }
     if (dataContent.submissions.filter(submission => submission.target === (interaction.options.getMember("member") as GuildMember).id).length === 0) return await interaction.followUp("They have no art?")
 })
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+    if (interaction.commandName !== "get_duolingo") return;
+    await interaction.deferReply();
+    let inviteCode = null;
+    try {
+        inviteCode = await generateDuolingoInvite();
+    } catch (e) {
+        return await interaction.followUp("Failed to generate an invite.")
+    }
+    return await interaction.followUp("https://invite.duolingo.com/family-plan/" + inviteCode)
+})
 const commands: RESTPutAPIApplicationCommandsJSONBody = [
     {
         type: ApplicationCommandType.ChatInput,
@@ -246,6 +295,11 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
                 required: true
             }
         ]
+    },
+    {
+        type: ApplicationCommandType.ChatInput,
+        name: "get_duolingo",
+        description: "Get a Duolingo invite"
     },
 ]
 if (!client.application) throw new Error("No application for client?")
