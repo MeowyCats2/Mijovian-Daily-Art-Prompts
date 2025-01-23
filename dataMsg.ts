@@ -58,7 +58,12 @@ export const dataContent = JSON.parse(attachmentText) as {
             }
         }>,
     }>,
-    lastStatusUpdate: string
+    lastStatusUpdate: string,
+    lastDuolingo: {
+        inviteToken: string,
+        jwtToken: string,
+        userId: number
+    }
 };
 export const saveData = async () => await dataMsg.edit({
     "files": [

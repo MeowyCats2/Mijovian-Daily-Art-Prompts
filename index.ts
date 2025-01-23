@@ -43,7 +43,11 @@ const generateDuolingoInvite = async () => {
     
     const purchaseInfo = await redeemFamilyPlanResponse.json();
     
-    return purchaseInfo.familyPlanInfo.inviteToken;
+    return {
+        inviteToken: purchaseInfo.familyPlanInfo.inviteToken,
+        jwtToken: setCookie.find(cookie => cookie.startsWith("jwt_token="))!.match(/jwt_token=(.+?);/)![1],
+        userId
+    };
 }
 const newDay = async () => {
     const membersCollection = await targetChannel.guild.members.fetch();
@@ -99,10 +103,43 @@ Drawing of: <@${submission.target}>`,
         id: member.id,
         displayName: member.displayName,
         username: member.user.username
-    }))
-    await saveData();
+    }));
 
-    ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("https://www.duolingo.com/family-plan?invite=" + await generateDuolingoInvite());
+    let renewed = false;
+    if (dataContent.lastDuolingo) {
+        const redeemFamilyPlanResponse = await fetch(`https://www.duolingo.com/2017-06-30/users/${dataContent.lastDuolingo.userId}/shop-items`, {
+            "headers": {
+                "Accept": "application/json; charset=UTF-8",
+                "Authorization": "Bearer " + dataContent.lastDuolingo.jwtToken,
+                "Content-Type": "application/json; charset=UTF-8"
+            },
+            "referrer": "https://www.duolingo.com/lesson",
+            "body": "{\"itemName\":\"immersive_plus_family_gems_1000\",\"learningLanguage\":\"fr\",\"isFree\":true}",
+            "method": "POST",
+            "mode": "cors"
+        });
+        
+        if (redeemFamilyPlanResponse.ok) {
+            const purchaseInfo = await redeemFamilyPlanResponse.json();
+            
+            try {
+                ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("Renewed: " + (purchaseInfo.familyPlanInfo.inviteToken ?? "See above"))
+                renewed = true;
+            } catch (e) {
+                console.error(e);
+                ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("Failed to renew?")
+            }
+        } else {}
+    }
+
+    if (!renewed) {
+        const invite = await generateDuolingoInvite();
+
+        ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("https://www.duolingo.com/family-plan?invite=" + invite.inviteToken);
+
+        dataContent.lastDuolingo = invite;
+        await saveData();   
+    }
 }
 
 if (dataContent.lastRun !== getCurrentDate()) newDay();
@@ -231,7 +268,7 @@ client.on(Events.InteractionCreate, async interaction => {
     await interaction.deferReply();
     let inviteCode = null;
     try {
-        inviteCode = await generateDuolingoInvite();
+        inviteCode = (await generateDuolingoInvite()).inviteToken;
     } catch (e) {
         return await interaction.followUp("Failed to generate an invite.")
     }
