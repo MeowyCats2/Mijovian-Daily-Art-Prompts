@@ -1,7 +1,7 @@
 import client from "./client.ts";
 import "./webserver.ts";
 import { dataContent, saveData } from "./dataMsg.ts"
-import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, InteractionContextType } from "discord.js";
+import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, InteractionContextType, MessageFlags } from "discord.js";
 import type { TextChannel, RESTPutAPIApplicationCommandsJSONBody, GuildMember } from "discord.js"
 import "./activity.ts";
 import JSZip from "jszip";
@@ -36,18 +36,14 @@ const generateDuolingoInvite = async () => {
             "Content-Type": "application/json; charset=UTF-8"
         },
         "referrer": "https://www.duolingo.com/lesson",
-        "body": "{\"itemName\":\"immersive_plus_family_gems_1000\",\"learningLanguage\":\"fr\",\"isFree\":true}",
+        "body": "{\"itemName\":\"immersive_family_subscription\",\"productId\": \"https://discord.gg/UkjYqDFMW4\",\"learningLanguage\":\"fr\",\"isFree\":true}",
         "method": "POST",
         "mode": "cors"
     });
     
     const purchaseInfo = await redeemFamilyPlanResponse.json();
     
-    return {
-        inviteToken: purchaseInfo.familyPlanInfo.inviteToken,
-        jwtToken: setCookie.find(cookie => cookie.startsWith("jwt_token="))!.match(/jwt_token=(.+?);/)![1],
-        userId
-    };
+    return purchaseInfo.familyPlanInfo.inviteToken;
 }
 const newDay = async () => {
     const membersCollection = await targetChannel.guild.members.fetch();
@@ -105,43 +101,11 @@ Drawing of: <@${submission.target}>`,
         username: member.user.username
     }));
 
-    let renewed = false;
-    if (dataContent.lastDuolingo) {
-        const redeemFamilyPlanResponse = await fetch(`https://www.duolingo.com/2017-06-30/users/${dataContent.lastDuolingo.userId}/shop-items`, {
-            "headers": {
-                "Accept": "application/json; charset=UTF-8",
-                "Authorization": "Bearer " + dataContent.lastDuolingo.jwtToken,
-                "Content-Type": "application/json; charset=UTF-8"
-            },
-            "referrer": "https://www.duolingo.com/lesson",
-            "body": "{\"itemName\":\"immersive_plus_family_gems_1000\",\"learningLanguage\":\"fr\",\"isFree\":true}",
-            "method": "POST",
-            "mode": "cors"
-        });
-        
-        if (redeemFamilyPlanResponse.ok) {
-            const purchaseInfo = await redeemFamilyPlanResponse.json();
-            
-            try {
-                ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("Renewed: " + (purchaseInfo.familyPlanInfo.inviteToken ?? "See above"))
-                renewed = true;
-            } catch (e) {
-                console.error(e);
-                ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("Failed to renew?")
-            }
-        } else {}
-    }
+    ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("https://www.duolingo.com/family-plan?invite=" + await generateDuolingoInvite());
 
-    if (!renewed) {
-        const invite = await generateDuolingoInvite();
-
-        ((await client.channels.fetch("1331508473665552384")) as TextChannel).send("https://www.duolingo.com/family-plan?invite=" + invite.inviteToken);
-
-        dataContent.lastDuolingo = invite;
-        await saveData();   
-    }
+    await saveData();
 }
-
+await newDay()
 if (dataContent.lastRun !== getCurrentDate()) newDay();
 
 const getMillisecondsUntilMidnight = () => {
@@ -268,11 +232,19 @@ client.on(Events.InteractionCreate, async interaction => {
     await interaction.deferReply();
     let inviteCode = null;
     try {
-        inviteCode = (await generateDuolingoInvite()).inviteToken;
+        inviteCode = await generateDuolingoInvite();
     } catch (e) {
         return await interaction.followUp("Failed to generate an invite.")
     }
     return await interaction.followUp("https://www.duolingo.com/family-plan?invite=" + inviteCode)
+})
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isMessageContextMenuCommand()) return;
+    if (interaction.commandName !== "Get Message Author") return;
+    return await interaction.reply({
+        content: interaction.targetMessage.author.id,
+        flags: [MessageFlags.Ephemeral]
+    })
 })
 const commands: RESTPutAPIApplicationCommandsJSONBody = [
     {
@@ -358,6 +330,10 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
             InteractionContextType.PrivateChannel
         ]
     },
+    {
+        type: ApplicationCommandType.Message,
+        name: "Get Message Author"
+    }
 ]
 if (!client.application) throw new Error("No application for client?")
 await client.rest.put(Routes.applicationCommands(client.application.id), {"body": commands})
