@@ -105,7 +105,7 @@ Drawing of: <@${submission.target}>`,
 
     await saveData();
 }
-await newDay()
+
 if (dataContent.lastRun !== getCurrentDate()) newDay();
 
 const getMillisecondsUntilMidnight = () => {
