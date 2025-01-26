@@ -102,14 +102,12 @@ client.on(Events.PresenceUpdate, async presence => {
     if (!presence) return;
     if (presence.status === "offline") return;
     updateActivity(presence.userId, "status");
-    await saveData();
 });
 
 client.on(Events.MessageCreate, async message => {
     if (!message) return;
     if (message.webhookId) return;
     updateActivity(message.author.id, "chat");
-    await saveData();
 });
 
 client.on(Events.InteractionCreate, async interaction => {
