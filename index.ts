@@ -1,10 +1,12 @@
 import client from "./client.ts";
 import "./webserver.ts";
 import { dataContent, saveData } from "./dataMsg.ts"
-import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, InteractionContextType, MessageFlags } from "discord.js";
-import type { TextChannel, RESTPutAPIApplicationCommandsJSONBody, GuildMember } from "discord.js"
+import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, ApplicationIntegrationType, MessageFlags, DiscordAPIError } from "discord.js";
+import type { TextChannel, RESTPutAPIApplicationCommandsJSONBody, GuildMember, PollAnswerData } from "discord.js"
 import "./activity.ts";
 import JSZip from "jszip";
+
+client.setMaxListeners(0);
 
 const targetChannel = await client.channels.fetch("1327068800931070064") as TextChannel;
 const dataChannel = await client.channels.fetch("1327066650133925898") as TextChannel;
@@ -246,6 +248,109 @@ client.on(Events.InteractionCreate, async interaction => {
         flags: [MessageFlags.Ephemeral]
     })
 })
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+    if (interaction.commandName !== "poll") return;
+    const answers: PollAnswerData[] = [];
+    for (let i = 1; i <= 10; i++) {
+        if (!interaction.options.getString("answer_" + i + "_emoji")) continue;
+        answers.push({
+            emoji: interaction.options.getString("answer_" + i + "_emoji") ?? undefined,
+            text: interaction.options.getString("answer_" + i + "_answer")!
+        })
+    }
+    await interaction.deferReply();
+    try {
+        await interaction.followUp({
+            poll: {
+                allowMultiselect: interaction.options.getBoolean("allow_multiple_answers")!,
+                answers,
+                duration: interaction.options.getInteger("duration")!,
+                question: {
+                    text: interaction.options.getString("question")!
+                }
+            }
+        })
+    } catch (e) {
+        console.error(e);
+        if (e instanceof DiscordAPIError) {
+            await interaction.followUp("Error code " + e.code + ": " + e.message)
+        } else {
+            await interaction.followUp("An unknown error occured.")
+        }
+    }
+})
+
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isAutocomplete()) return;
+    if (interaction.commandName !== "poll") return;
+    await interaction.respond([
+        {
+            name: "1 hour",
+            value: 1
+        },
+        {
+            name: "4 hours",
+            value: 4
+        },
+        {
+            name: "8 hours",
+            value: 8
+        },
+        {
+            name: "24 hours",
+            value: 24
+        },
+        {
+            name: "3 days",
+            value: 24 * 3
+        },
+        {
+            name: "1 week",
+            value: 24 * 7
+        },
+        {
+            name: "2 weeks",
+            value: 24 * 14
+        }
+    ])
+})
+
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isMessageContextMenuCommand()) return;
+    if (interaction.commandName !== "End Bot Poll Now") return;
+    if (interaction.targetMessage.author.id !== client.user?.id) return await interaction.reply({
+        content: "I didn't send this message.",
+        flags: MessageFlags.Ephemeral
+    })
+    if (interaction.targetMessage.interactionMetadata?.user.id !== interaction.user.id) return await interaction.reply({
+        content: "You didn't run the command of the message.",
+        flags: MessageFlags.Ephemeral
+    })
+    if (!interaction.targetMessage.poll) return await interaction.reply({
+        content: "There is no poll.",
+        flags: MessageFlags.Ephemeral
+    })
+    try {
+        await interaction.targetMessage.poll.end();
+    } catch (e) {
+        console.error(e);
+        if (e instanceof DiscordAPIError) {
+            return await interaction.reply({
+                content: "Error code " + e.code + ": " + e.message,
+                flags: MessageFlags.Ephemeral
+        })
+        } else {
+            return await interaction.reply({
+                content: "An unknown error occured.",
+                flags: MessageFlags.Ephemeral
+            })
+        }
+    }
+    await interaction.reply({
+        content: "Poll ended."
+    });
+})
 const commands: RESTPutAPIApplicationCommandsJSONBody = [
     {
         type: ApplicationCommandType.ChatInput,
@@ -268,16 +373,16 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
                 required: true
             }
         ],
-        contexts: [
-            InteractionContextType.Guild
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall
         ]
     },
     {
         type: ApplicationCommandType.ChatInput,
         name: "my_art",
         description: "See all your submissions",
-        contexts: [
-            InteractionContextType.Guild
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall
         ]
     },
     {
@@ -292,16 +397,16 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
                 required: true
             }
         ],
-        contexts: [
-            InteractionContextType.Guild
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall
         ]
     },
     {
         type: ApplicationCommandType.ChatInput,
         name: "export_art",
         description: "Export all your submissions",
-        contexts: [
-            InteractionContextType.Guild
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall
         ]
     },
     {
@@ -316,24 +421,164 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
                 required: true
             }
         ],
-        contexts: [
-            InteractionContextType.Guild
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall
         ]
     },
     {
         type: ApplicationCommandType.ChatInput,
         name: "get_duolingo",
         description: "Get a Duolingo invite",
-        contexts: [
-            InteractionContextType.Guild,
-            InteractionContextType.BotDM,
-            InteractionContextType.PrivateChannel
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall,
+            ApplicationIntegrationType.UserInstall
         ]
     },
     {
         type: ApplicationCommandType.Message,
-        name: "Get Message Author"
-    }
+        name: "Get Message Author",
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall,
+            ApplicationIntegrationType.UserInstall
+        ]
+    },
+    {
+        type: ApplicationCommandType.ChatInput,
+        name: "poll",
+        description: "Create a poll in the channel",
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall,
+            ApplicationIntegrationType.UserInstall
+        ],
+        options: [
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "question",
+                description: "What question do you want to ask?",
+                required: true
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_1_answer",
+                description: "Type your answer",
+                required: true
+            },
+            {
+                type: ApplicationCommandOptionType.Integer,
+                name: "duration",
+                description: "Number of hours until the poll ends",
+                autocomplete: true,
+                required: true
+            },
+            {
+                type: ApplicationCommandOptionType.Boolean,
+                name: "allow_multiple_answers",
+                description: "Allow multiple answers"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_1_emoji",
+                description: "Pick an emoji"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_2_emoji",
+                description: "Pick an emoji"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_2_answer",
+                description: "Type your answer"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_3_emoji",
+                description: "Pick an emoji"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_3_answer",
+                description: "Type your answer"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_4_emoji",
+                description: "Pick an emoji"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_4_answer",
+                description: "Type your answer"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_5_emoji",
+                description: "Pick an emoji"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_5_answer",
+                description: "Type your answer"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_6_emoji",
+                description: "Pick an emoji"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_6_answer",
+                description: "Type your answer"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_7_emoji",
+                description: "Pick an emoji"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_7_answer",
+                description: "Type your answer"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_8_emoji",
+                description: "Pick an emoji"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_8_answer",
+                description: "Type your answer"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_9_emoji",
+                description: "Pick an emoji"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_9_answer",
+                description: "Type your answer"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_10_emoji",
+                description: "Pick an emoji"
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "answer_10_answer",
+                description: "Type your answer"
+            },
+        ],
+    },
+    {
+        type: ApplicationCommandType.Message,
+        name: "End Bot Poll Now",
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall
+        ]
+    },
 ]
 if (!client.application) throw new Error("No application for client?")
 await client.rest.put(Routes.applicationCommands(client.application.id), {"body": commands})
