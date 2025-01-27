@@ -253,7 +253,7 @@ client.on(Events.InteractionCreate, async interaction => {
     if (interaction.commandName !== "poll") return;
     const answers: PollAnswerData[] = [];
     for (let i = 1; i <= 10; i++) {
-        if (!interaction.options.getString("answer_" + i + "_emoji")) continue;
+        if (!interaction.options.getString("answer_" + i + "_answer")) continue;
         answers.push({
             emoji: interaction.options.getString("answer_" + i + "_emoji") ?? undefined,
             text: interaction.options.getString("answer_" + i + "_answer")!
