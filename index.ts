@@ -4,6 +4,7 @@ import { dataContent, saveData } from "./dataMsg.ts"
 import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, ApplicationIntegrationType, MessageFlags, DiscordAPIError } from "discord.js";
 import type { TextChannel, RESTPutAPIApplicationCommandsJSONBody, GuildMember, PollAnswerData } from "discord.js"
 import "./activity.ts";
+import { styleText } from "./formatting.ts";
 import JSZip from "jszip";
 
 client.setMaxListeners(0);
@@ -351,6 +352,67 @@ client.on(Events.InteractionCreate, async interaction => {
         content: "Poll ended."
     });
 })
+
+const createStyleChoice = (name: string, id: string) => styleText(name, id, false, false) + " - " + name
+const styleChoices = [
+    {
+        name: createStyleChoice("Bold (sans-serif)", "bold-sans-serif"),
+        value: "bold-sans-serif"
+    },
+    {
+        name: createStyleChoice("Bold (serif)", "bold-serif"),
+        value: "bold-serif"
+    },
+    {
+        name: createStyleChoice("Italic (sans-serif)", "italic-sans-serif"),
+        value: "italic-sans-serif"
+    },
+    {
+        name: createStyleChoice("Italic (serif)", "italic-serif"),
+        value: "italic-serif"
+    },
+    {
+        name: createStyleChoice("Bold Italic (sans-serif)", "bold-italic-sans-serif"),
+        value: "bold-italic-sans-serif"
+    },
+    {
+        name: createStyleChoice("Bold Italic (serif)", "bold-italic-serif"),
+        value: "bold-italic-serif"
+    },
+    {
+        name: createStyleChoice("Cursive", "cursive"),
+        value: "cursive"
+    },
+    {
+        name: createStyleChoice("Cursive Bold", "cursive-bold"),
+        value: "cursive-bold"
+    },
+    {
+        name: createStyleChoice("Medieval", "medieval"),
+        value: "medieval"
+    },
+    {
+        name: createStyleChoice("Medieval Bold", "medieval-bold"),
+        value: "medieval-bold"
+    },
+    {
+        name: createStyleChoice("Doublestruck", "doublestruck"),
+        value: "doublestruck"
+    },
+    {
+        name: createStyleChoice("Typewriter", "typewriter"),
+        value: "typewriter"
+    },
+    {
+        name: createStyleChoice("Fraktur", "fraktur"),
+        value: "fraktur"
+    },
+    {
+        name: createStyleChoice("Fraktur Bold", "fraktur-bold"),
+        value: "fraktur-bold"
+    },
+]
+
 const commands: RESTPutAPIApplicationCommandsJSONBody = [
     {
         type: ApplicationCommandType.ChatInput,
@@ -577,6 +639,63 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
         name: "End Bot Poll Now",
         integration_types: [
             ApplicationIntegrationType.GuildInstall
+        ]
+    },
+    {
+        type: ApplicationCommandType.ChatInput,
+        name: "style_channel_name",
+        description: "Style a channel name",
+        options: [
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "style",
+                description: "The style to set it as",
+                required: true,
+                choices: styleChoices
+            },
+            {
+                type: ApplicationCommandOptionType.Boolean,
+                name: "autocapitalize",
+                description: "Make each letter after after a hyphen capital?",
+                required: true
+            },
+            {
+                type: ApplicationCommandOptionType.Boolean,
+                name: "preclean",
+                description: "Whether or not to unstyle the text first"
+            },
+        ],
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall
+        ]
+    },
+    {
+        type: ApplicationCommandType.ChatInput,
+        name: "style_text",
+        description: "Style text",
+        options: [
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "text",
+                description: "The text to style",
+                required: true
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "style",
+                description: "The style to set it as",
+                required: true,
+                choices: styleChoices
+            },
+            {
+                type: ApplicationCommandOptionType.Boolean,
+                name: "preclean",
+                description: "Whether or not to unstyle the text first"
+            },
+        ],
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall,
+            ApplicationIntegrationType.UserInstall
         ]
     },
 ]
