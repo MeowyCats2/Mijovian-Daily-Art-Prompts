@@ -947,5 +947,12 @@ client.on(Events.InteractionCreate, async interaction => {
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
     if (interaction.commandName !== "style_text") return;
-    return await interaction.reply(styleText(interaction.options.getString("text")!, interaction.options.getString("style")!, false, interaction.options.getBoolean("preclean") ?? true));
+    return await interaction.reply({
+        content: styleText(interaction.options.getString("text")!, interaction.options.getString("style")!, false, interaction.options.getBoolean("preclean") ?? true),
+        allowedMentions: {
+            parse: [],
+            roles: [],
+            users: []
+        }
+    });
 })
