@@ -1,7 +1,7 @@
 import client from "./client.ts";
 import "./webserver.ts";
 import { dataContent, saveData } from "./dataMsg.ts"
-import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, ApplicationIntegrationType, MessageFlags, DiscordAPIError } from "discord.js";
+import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, ApplicationIntegrationType, InteractionContextType, MessageFlags, DiscordAPIError } from "discord.js";
 import type { TextChannel, RESTPutAPIApplicationCommandsJSONBody, GuildMember, PollAnswerData } from "discord.js"
 import "./activity.ts";
 import { styleText } from "./formatting.ts";
@@ -502,6 +502,11 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
         integration_types: [
             ApplicationIntegrationType.GuildInstall,
             ApplicationIntegrationType.UserInstall
+        ],
+        contexts: [
+            InteractionContextType.BotDM,
+            InteractionContextType.Guild,
+            InteractionContextType.PrivateChannel
         ]
     },
     {
@@ -511,6 +516,11 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
         integration_types: [
             ApplicationIntegrationType.GuildInstall,
             ApplicationIntegrationType.UserInstall
+        ],
+        contexts: [
+            InteractionContextType.BotDM,
+            InteractionContextType.Guild,
+            InteractionContextType.PrivateChannel
         ],
         options: [
             {
@@ -701,6 +711,11 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
         integration_types: [
             ApplicationIntegrationType.GuildInstall,
             ApplicationIntegrationType.UserInstall
+        ],
+        contexts: [
+            InteractionContextType.BotDM,
+            InteractionContextType.Guild,
+            InteractionContextType.PrivateChannel
         ]
     },
 ]
