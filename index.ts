@@ -664,6 +664,11 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
                 name: "preclean",
                 description: "Whether or not to unstyle the text first"
             },
+            {
+                type: ApplicationCommandOptionType.Boolean,
+                name: "prefix",
+                description: "Whether or not to include a prefix"
+            },
         ],
         integration_types: [
             ApplicationIntegrationType.GuildInstall

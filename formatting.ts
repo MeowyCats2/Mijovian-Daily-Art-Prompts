@@ -912,8 +912,18 @@ client.on(Events.InteractionCreate, async interaction => {
     //if (interaction.channel instanceof PartialGroupDMChannel) return await interaction.reply("This channel can't have a name!");
     if (interaction.channel.type === ChannelType.DM || interaction.channel instanceof PartialGroupDMChannel) return await interaction.reply("This is DM channel, and this command will not work here.")
     if (!interaction.channel.name) return await interaction.reply("This channel doesn't have a name!");
-    const result = styleText(interaction.channel.name, interaction.options.getString("style")!, interaction.options.getBoolean("autocapitalize")!, interaction.options.getBoolean("preclean") ?? true)
+    let result = styleText(interaction.channel.name, interaction.options.getString("style")!, interaction.options.getBoolean("autocapitalize")!, interaction.options.getBoolean("preclean") ?? true)
     if (interaction.channel.name === result) return await interaction.reply("Could not apply style; is the channel name already styled?");
+    if (interaction.options.getBoolean("prefix") && interaction.channel.parent?.type === ChannelType.GuildCategory && "position" in interaction.channel) {
+        const siblings = [...interaction.channel.parent.children.cache.keys()];
+        if (interaction.channel.position === siblings.length - 1) {
+            result = "\u255A" + result;
+        } else if (interaction.channel.position === 0) {
+            result = "\u2554" + result;
+        } else {
+            result = "\u2560" + result;
+        }
+    }
     await interaction.deferReply({
         flags: MessageFlags.Ephemeral
     });
