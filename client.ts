@@ -6,7 +6,8 @@ const client = new Client({
     intents: [GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildModeration,
 GatewayIntentBits.Guilds,
 GatewayIntentBits.GuildMessages,
-GatewayIntentBits.GuildPresences],
+GatewayIntentBits.GuildPresences,
+GatewayIntentBits.MessageContent],
   }); // creates a new bot client
 
 client.once(Events.ClientReady, c => {

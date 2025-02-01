@@ -1,8 +1,8 @@
 import client from "./client.ts";
 import "./webserver.ts";
 import { dataContent, saveData } from "./dataMsg.ts"
-import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, ApplicationIntegrationType, InteractionContextType, MessageFlags, DiscordAPIError } from "discord.js";
-import type { TextChannel, RESTPutAPIApplicationCommandsJSONBody, GuildMember, PollAnswerData } from "discord.js"
+import { Routes, ApplicationCommandType, ApplicationCommandOptionType, Events, ApplicationIntegrationType, InteractionContextType, MessageFlags, DiscordAPIError, TextChannel, GuildMember } from "discord.js";
+import type { RESTPutAPIApplicationCommandsJSONBody, PollAnswerData, Message } from "discord.js"
 import "./activity.ts";
 import { styleText } from "./formatting.ts";
 import JSZip from "jszip";
@@ -353,6 +353,56 @@ client.on(Events.InteractionCreate, async interaction => {
     });
 })
 
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+    if (interaction.commandName !== "restore_quarantine_roles") return;
+    const logsChannel = interaction.options.getChannel("logs_channel");
+    if (!logsChannel || !(logsChannel instanceof TextChannel)) return await interaction.reply("Logs channel must be a text channel.");
+    if (logsChannel.guildId !== interaction.guildId) return await interaction.reply("Wrong guild!");
+    const checkMessage = async (message: Message) => {
+        for (const embed of message.embeds) {
+            if (embed.title !== "Roles updated") continue;
+            const member = interaction.options.getMember("user")!;
+            if (!(member instanceof GuildMember)) return await interaction.reply("Not a member?");
+            if (embed.author?.name !== member.user.username) continue;
+            const addedText = embed.description?.split("\n")[0].split("**Added:** ")[1];
+            if (!addedText) continue;
+            const addedId = addedText.match(/<@&([0-9]+)>/)?.[1];
+            if (!addedId) continue;
+            if (addedId !== interaction.options.getRole("quarantine_role")?.id) continue;
+            const removedText = embed.description?.split("\n")[1].split("**Removed:** ")[1];
+            if (!removedText) continue;
+            let roles: string[] = [];
+            for (const roleText of removedText.split(" ")) {
+                const roleId = roleText.match(/<@&([0-9]+)>/)?.[1];
+                if (!roleId) continue;
+                roles.push(roleId);
+            }
+            await member.roles.add(roles);
+            console.log(roles);
+            console.log("Added roles.");
+            return true;
+        };
+    }
+    const messages = await logsChannel.messages.fetch({limit: 100});
+    await interaction.deferReply();
+    let succeeded = false;
+    for (const message of messages.values()) {
+        if (await checkMessage(message)) succeeded = true;
+    }
+    let earliest = [...messages.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp)[0].id;
+    while (1) {
+        const earlierMessages = [...(await logsChannel.messages.fetch({limit: 100, before: earliest})).values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+        for (const message of earlierMessages) {
+            if (await checkMessage(message)) succeeded = true;
+        }
+        if (earlierMessages.length < 100) break;
+        earliest = earlierMessages[0].id;
+        if (Date.now() - earlierMessages[0].createdTimestamp > 2 * 7 * 24 * 60 * 60 * 1000) break;
+    }
+    return await interaction.followUp(succeeded ? "Finished!" : "Message not found?")
+})
+
 const createStyleChoice = (name: string, id: string) => styleText(name, id, false, false) + " - " + name
 const styleChoices = [
     {
@@ -686,36 +736,30 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
     },
     {
         type: ApplicationCommandType.ChatInput,
-        name: "style_text",
-        description: "Style text",
+        name: "restore_quarantine_roles",
+        description: "Does not actually unquarantine them!",
         options: [
             {
-                type: ApplicationCommandOptionType.String,
-                name: "text",
-                description: "The text to style",
+                type: ApplicationCommandOptionType.User,
+                name: "user",
+                description: "The user to restore the roles of",
                 required: true
             },
             {
-                type: ApplicationCommandOptionType.String,
-                name: "style",
-                description: "The style to set it as",
-                required: true,
-                choices: styleChoices
+                type: ApplicationCommandOptionType.Channel,
+                name: "logs_channel",
+                description: "The channel Carl-bot puts the logs",
+                required: true
             },
             {
-                type: ApplicationCommandOptionType.Boolean,
-                name: "preclean",
-                description: "Whether or not to unstyle the text first"
+                type: ApplicationCommandOptionType.Role,
+                name: "quarantine_role",
+                description: "The role Wick uses to quarantine",
+                required: true
             },
         ],
         integration_types: [
-            ApplicationIntegrationType.GuildInstall,
-            ApplicationIntegrationType.UserInstall
-        ],
-        contexts: [
-            InteractionContextType.BotDM,
-            InteractionContextType.Guild,
-            InteractionContextType.PrivateChannel
+            ApplicationIntegrationType.GuildInstall
         ]
     },
 ]
