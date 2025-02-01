@@ -736,6 +736,40 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
     },
     {
         type: ApplicationCommandType.ChatInput,
+        name: "style_text",
+        description: "Style text",
+        options: [
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "text",
+                description: "The text to style",
+                required: true
+            },
+            {
+                type: ApplicationCommandOptionType.String,
+                name: "style",
+                description: "The style to set it as",
+                required: true,
+                choices: styleChoices
+            },
+            {
+                type: ApplicationCommandOptionType.Boolean,
+                name: "preclean",
+                description: "Whether or not to unstyle the text first"
+            },
+        ],
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall,
+            ApplicationIntegrationType.UserInstall
+        ],
+        contexts: [
+            InteractionContextType.BotDM,
+            InteractionContextType.Guild,
+            InteractionContextType.PrivateChannel
+        ]
+    },
+    {
+        type: ApplicationCommandType.ChatInput,
         name: "restore_quarantine_roles",
         description: "Does not actually unquarantine them!",
         options: [
