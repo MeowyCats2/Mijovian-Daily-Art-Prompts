@@ -403,6 +403,40 @@ client.on(Events.InteractionCreate, async interaction => {
     return await interaction.followUp(succeeded ? "Finished!" : "Message not found?")
 })
 
+client.on(Events.InteractionCreate, async interaction => {
+	if (!interaction.isChatInputCommand()) return;
+    if (interaction.commandName !== "level_gap_check") return;
+    const channel = await client.channels.fetch("1275812346648072336") as TextChannel;
+    let messages = [...(await channel.messages.fetch({limit: 100})).values()];
+    await interaction.deferReply();
+    let earliest = [...messages.values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp)[0].id;
+    while (1) {
+        const earlierMessages = [...(await channel.messages.fetch({limit: 100, before: earliest})).values()].sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+        messages.push(...earlierMessages);
+        console.log(messages.length)
+        if (earlierMessages.length < 100) break;
+        earliest = earlierMessages[0].id;
+    }
+    messages = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+    let first = null;
+    let previous = null;
+    const result = [];
+    for (const message of messages) {
+        if (!message.content.includes("<@" + interaction.options.getUser("user")!.id + ">")) continue;
+        if (!message.content.match(/level \*\*([0-9]+)\*\*/)) {
+            console.log(message.content);
+            continue;
+        }
+        const level = +message.content.match(/level \*\*([0-9]+)/)![1];
+        if (!first) first = level;
+        if (previous && (level - previous > 1 || level <= previous)) {
+            result.push(`<t:${Math.floor(message.createdTimestamp / 1000)}:F> Level ${previous} to ${level}`)
+        }
+        previous = level;
+    }
+    await interaction.followUp(result.length > 0 ? result.join("\n") : "No gaps found.")
+})
+
 const createStyleChoice = (name: string, id: string) => styleText(name, id, false, false) + " - " + name
 const styleChoices = [
     {
@@ -791,6 +825,22 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
                 description: "The role Wick uses to quarantine",
                 required: true
             },
+        ],
+        integration_types: [
+            ApplicationIntegrationType.GuildInstall
+        ]
+    },
+    {
+        type: ApplicationCommandType.ChatInput,
+        name: "level_gap_check",
+        description: "Checks the leveling gaps of a user",
+        options: [
+            {
+                type: ApplicationCommandOptionType.User,
+                name: "user",
+                description: "The user to check the true level of",
+                required: true
+            }
         ],
         integration_types: [
             ApplicationIntegrationType.GuildInstall
