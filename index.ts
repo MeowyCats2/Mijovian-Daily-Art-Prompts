@@ -421,6 +421,7 @@ client.on(Events.InteractionCreate, async interaction => {
     let first = null;
     let previous = null;
     const result = [];
+    let levelsDifference = 0;
     for (const message of messages) {
         if (!message.content.includes("<@" + interaction.options.getUser("user")!.id + ">")) continue;
         if (!message.content.match(/level \*\*([0-9]+)\*\*/)) {
@@ -430,11 +431,14 @@ client.on(Events.InteractionCreate, async interaction => {
         const level = +message.content.match(/level \*\*([0-9]+)/)![1];
         if (!first) first = level;
         if (previous && (level - previous > 1 || level <= previous)) {
-            result.push(`<t:${Math.floor(message.createdTimestamp / 1000)}:F> Level ${previous} to ${level}`)
+            result.push(`<t:${Math.floor(message.createdTimestamp / 1000)}:F> Level ${previous} to ${level} (${level - previous > 0 ? "+" + (level - previous - 1) : level - previous - 1})`)
+            levelsDifference += level - previous - 1;
         }
         previous = level;
     }
-    await interaction.followUp(result.length > 0 ? result.join("\n") : "No gaps found.")
+    await interaction.followUp(result.length > 0 ? `${result.join("\n")}
+
+They have a difference of ${levelsDifference} levels.` : "No gaps found.")
 })
 
 const createStyleChoice = (name: string, id: string) => styleText(name, id, false, false) + " - " + name
