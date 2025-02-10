@@ -565,6 +565,22 @@ const commands: RESTPutAPIApplicationCommandsJSONBody = [
         description: "See the activity of a member",
         options: [
             {
+                type: ApplicationCommandOptionType.String,
+                name: "category",
+                description: "The category to check for",
+                required: true,
+                choices: [
+                    {
+                        name: "Status",
+                        value: "status"
+                    },
+                    {
+                        name: "Chat",
+                        value: "chat"
+                    },
+                ]
+            },
+            {
                 type: ApplicationCommandOptionType.User,
                 name: "member",
                 description: "The member to check for",

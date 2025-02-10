@@ -113,7 +113,7 @@ client.on(Events.MessageCreate, async message => {
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
     if (interaction.commandName !== "activity_chart") return;
-    const data = dataContent.activity[(interaction.options.getMember("member") as GuildMember).id]?.general.status;
+    const data = dataContent.activity[(interaction.options.getMember("member") as GuildMember).id]?.general[interaction.options.getString("category") as "status" | "chat"];
     if (!data) return await interaction.reply("No data.")
     const hours: Record<string, number> = {};
     for (let i = 0; i < 24; i++) {
